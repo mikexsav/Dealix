@@ -24,27 +24,17 @@ class MainActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch {
-//            try {
-//
-//                // 🔥 1. создаём компанию (дилер)
-//                val company = api.createCompany("ААА Моторс")
-//                Log.e("COMPANY", company)
-//
-//                // 🔥 2. создаём сделку
-//                val lead = api.createLead("Продажа авто")
-//                Log.e("LEAD", lead)
-//
-//                // 🔥 3. создаём контакт
-//                val contact = api.createContact("Владислав", "+79885557063")
-//                Log.e("CONTACT", contact)
-//
-//                // 🔥 4. получаем сделки
-//                val leads = api.getLeads()
-//                Log.e("LEADS", leads)
-//
-//            } catch (e: Exception) {
-//                Log.e("ERROR", e.message ?: "error")
-//            }
+            try {
+
+                val leads = api.getLeadsList()
+
+                leads.forEach {
+                    Log.e("LEAD", "id=${it.id}, name=${it.name}")
+                }
+
+            } catch (e: Exception) {
+                Log.e("ERROR", e.message ?: "error")
+            }
         }
     }
 }

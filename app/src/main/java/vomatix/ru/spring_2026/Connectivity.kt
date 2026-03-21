@@ -1,11 +1,18 @@
 package vomatix.ru.spring_2026
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
+import vomatix.ru.spring_2026.models.Lead
+import vomatix.ru.spring_2026.models.LeadResponse
 import java.io.IOException
 
+private val moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
 class Connectivity(
     private val baseUrl: String,
     private val clientId: String,
@@ -143,5 +150,13 @@ class Connectivity(
         """.trimIndent()
 
         return request("POST", "/api/v4/leads/$leadId/notes", json)
+    }
+    suspend fun getLeadsList(): MutableList<Lead> {
+        val json = request("GET", "/api/v4/leads")
+
+        val adapter = moshi.adapter(LeadResponse::class.java)
+        val response = adapter.fromJson(json)
+
+        return response?._embedded?.leads?.toMutableList() ?: mutableListOf()
     }
 }
