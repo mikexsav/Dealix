@@ -78,4 +78,10 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
         // текст прогресса
         tvProgress.text = "$progress / 100"
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        (activity as? MainActivity)?.runCalculation()
+    }
 }
