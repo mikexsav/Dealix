@@ -157,6 +157,7 @@ class AuthActivity : AppCompatActivity() {
         vkidBottomSheet.visibility = View.VISIBLE
 
         clearPin()
+        animateScreen(greetingText, authButton)
     }
 
     private fun showCreatePinScreen() {
@@ -167,9 +168,18 @@ class AuthActivity : AppCompatActivity() {
         biometricButton.visibility = View.GONE
         pinContainer.visibility = View.VISIBLE
         keyboard.visibility = View.VISIBLE
+        keyboard.translationY = 200f
+        keyboard.alpha = 0f
+
+        keyboard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(300)
+            .start()
         vkidBottomSheet.visibility = View.GONE
 
         clearPin()
+        animateScreen(greetingText, pinContainer, keyboard)
     }
 
     private fun showEnterPinScreen() {
@@ -179,6 +189,14 @@ class AuthActivity : AppCompatActivity() {
         authButton.visibility = View.GONE
         pinContainer.visibility = View.VISIBLE
         keyboard.visibility = View.VISIBLE
+        keyboard.translationY = 200f
+        keyboard.alpha = 0f
+
+        keyboard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(300)
+            .start()
         vkidBottomSheet.visibility = View.GONE
 
         clearPin()
@@ -193,6 +211,7 @@ class AuthActivity : AppCompatActivity() {
         } else {
             biometricButton.visibility = View.GONE
         }
+        animateScreen(greetingText, pinContainer, keyboard, biometricButton)
     }
 
     private fun onVkAuthSuccess() {
@@ -373,8 +392,33 @@ class AuthActivity : AppCompatActivity() {
         finish()
     }
     fun View.pressAnim() {
-        this.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
-            this.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
-        }.start()
+        this.animate()
+            .scaleX(0.9f)
+            .scaleY(0.9f)
+            .setDuration(70)
+            .withEndAction {
+                this.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(120)
+                    .setInterpolator(android.view.animation.OvershootInterpolator(1.5f))
+                    .start()
+            }
+            .start()
+    }
+    private fun animateScreen(vararg views: View) {
+        views.forEachIndexed { index, view ->
+            view.alpha = 0f
+            view.translationY = 80f
+
+            view.postDelayed({
+                view.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(400)
+                    .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
+                    .start()
+            }, (index * 80).toLong())
+        }
     }
 }
