@@ -16,57 +16,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/linearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/back_half_black">
-
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/back_half_black">
-
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/back_half_black">
-
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            </LinearLayout>
-
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="16dp"
                 android:text="Ваш финансовый эффект"
                 android:textColor="@color/white"
-                android:textSize="16dp"
+                android:textSize="20dp"
+                android:layout_marginTop="20dp"
                 android:textStyle="normal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -172,7 +133,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+120 000 ₽"
-                        android:textColor="@color/vkid_green"
+                        android:textColor="@color/sber"
                         android:textFontWeight="700"
                         android:textSize="15dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -217,7 +178,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+90 000 ₽"
-                        android:textColor="@color/vkid_green"
+                        android:textColor="@color/sber"
                         android:textFontWeight="700"
                         android:textSize="15dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -258,11 +219,10 @@
 
                     <TextView
                         android:layout_marginEnd="14dp"
-                        android:id="@+id/v_cashback"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+7 000 ₽"
-                        android:textColor="@color/vkid_green"
+                        android:textColor="@color/sber"
                         android:textFontWeight="700"
                         android:textSize="15dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -307,7 +267,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+95 400 ₽"
-                        android:textColor="@color/vkid_green"
+                        android:textColor="@color/sber"
                         android:textFontWeight="700"
                         android:textSize="15dp"
                         app:layout_constraintBottom_toBottomOf="parent"
