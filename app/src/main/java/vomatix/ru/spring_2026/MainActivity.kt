@@ -71,7 +71,8 @@ class MainActivity : AppCompatActivity() {
                     val data = response.body()
                     val rating = (data?.rating as? Double) ?: 0.0
                     val status = data?.status ?: "Silver"
-
+                    DataHolder.rating = rating
+                    DataHolder.status = status
                     // 🔥 ВОТ ЭТО
                     pageMain.updateData(rating, status)
                     Log.d("SBER_DEBUG", "РЕЙТИНГ: ${data?.rating}, СТАТУС: ${data?.status}")
