@@ -149,7 +149,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginStart="14dp"
-                        android:src="@drawable/logo"
+                        android:src="@drawable/gift"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -194,7 +194,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginStart="14dp"
-                        android:src="@drawable/logo"
+                        android:src="@drawable/ipoteka"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -239,7 +239,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginStart="14dp"
-                        android:src="@drawable/logo"
+                        android:src="@drawable/cashback"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
