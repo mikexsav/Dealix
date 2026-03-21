@@ -25,13 +25,16 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-
-                val leads = api.getLeadsList()
-
-                leads.forEach {
-                    Log.e("LEAD", "id=${it.id}, name=${it.name}")
-                }
-
+                val res = api.createCarDealVanilla(
+                    carName = "BMW X5",
+                    saleType = "КРЕДИТ",
+                    price = 5500000,
+                    managerName = "Иванов Иван Иванович",
+                    managerPhone = "+79990000101",
+                    managerEmail = "ivanov@mail.ru",
+                    companyName = "BMW Центр Москва"
+                )
+                Log.e("OK", res)
             } catch (e: Exception) {
                 Log.e("ERROR", e.message ?: "error")
             }
