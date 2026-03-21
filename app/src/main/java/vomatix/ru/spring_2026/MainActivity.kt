@@ -69,6 +69,11 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.isSuccessful) {
                     val data = response.body()
+                    val rating = (data?.rating as? Double) ?: 0.0
+                    val status = data?.status ?: "Silver"
+
+                    // 🔥 ВОТ ЭТО
+                    pageMain.updateData(rating, status)
                     Log.d("SBER_DEBUG", "РЕЙТИНГ: ${data?.rating}, СТАТУС: ${data?.status}")
                 } else {
                     Log.e("SBER_DEBUG", "Ошибка сервера: ${response.errorBody()?.string()}")

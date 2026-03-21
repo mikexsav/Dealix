@@ -39,12 +39,31 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/poddershka"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/back_half_black">
-
+                    <ImageView
+                        android:id="@+id/lupa"
+                        android:src="@drawable/search"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"/>
+                    <TextView
+                        android:textSize="15dp"
+                        android:text="Поиск"
+                        android:textColor="@color/white"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/lupa"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginStart="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -53,17 +72,32 @@
                     android:layout_height="40dp"
                     android:layout_marginStart="10dp"
                     android:background="@drawable/back_half_black">
-
+                    <ImageView
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:src="@drawable/menu"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/gotoGIGA"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:background="@drawable/back_half_black">
-
+                    <ImageView
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:src="@drawable/chat"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -85,7 +119,7 @@
             <HorizontalScrollView
                 android:id="@+id/horizontalScrollView"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="90dp"
                 android:layout_marginTop="20dp"
                 android:scrollbars="none"
                 app:layout_constraintStart_toStartOf="parent"
@@ -98,19 +132,77 @@
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="200dp"
-                        android:layout_height="100dp"
+                        android:layout_height="90dp"
                         android:layout_marginStart="10dp"
                         android:background="@drawable/back_half_black">
 
+                        <TextView
+                            android:id="@+id/textView12"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:text="Silver"
+                            android:textColor="@color/white"
+                            android:textFontWeight="700"
+                            android:textSize="20dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_marginTop="18dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:text="Базовые привелегии"
+                            android:textColor="#ACACAC"
+                            android:textFontWeight="700"
+                            android:textSize="16dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="200dp"
-                        android:layout_height="100dp"
+                        android:layout_height="90dp"
                         android:layout_marginStart="10dp"
                         android:background="@drawable/back_half_black">
 
+                        <TextView
+                            android:id="@+id/textView22"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:text="До Gold"
+                            android:textColor="@color/white"
+                            android:textFontWeight="700"
+                            android:textSize="20dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ProgressBar
+                            android:id="@+id/progressBar"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="170dp"
+                            android:layout_height="9dp"
+                            android:layout_marginTop="10dp"
+                            android:max="100"
+                            android:progress="60"
+                            android:progressDrawable="@drawable/bg_progress"
+                            app:layout_constraintStart_toStartOf="@id/textView22"
+                            app:layout_constraintTop_toBottomOf="@+id/textView22" />
+
+                        <TextView
+                            android:id="@+id/tvProgressText"
+                            android:layout_marginTop="5dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="14 / 42"
+                            android:textColor="@color/white"
+                            app:layout_constraintStart_toStartOf="@+id/progressBar"
+                            app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -119,7 +211,7 @@
             </HorizontalScrollView>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout"
+                android:id="@+id/advantage_level"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="10dp"
@@ -129,18 +221,82 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView">
 
+                <TextView
+                    android:id="@+id/textview33"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:text="Привилегии уровня"
+                    android:textColor="@color/white"
+                    android:textFontWeight="700"
+                    android:textSize="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:layout_marginEnd="15dp"
+                    android:rotation="180"
+                    android:layout_width="8dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/back"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout2"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="160dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/back_half_black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+                app:layout_constraintTop_toBottomOf="@+id/advantage_level">
+                <TextView
+                    android:id="@+id/textview32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Финансовый прогноз"
+                    android:textColor="@color/white"
+                    android:textFontWeight="700"
+                    android:textSize="20dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/deskription_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:text="При переходе на Gold ваш годовой доход\nвырастет на 180 000 ₽"
+                    android:textColor="#ACACAC"
+                    android:textFontWeight="600"
+                    android:textSize="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textview32" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/finance_perehod"
+                    android:background="@drawable/back_green"
+                    android:layout_width="180dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_height="44dp"
+                    app:layout_constraintStart_toStartOf="@+id/deskription_text"
+                    app:layout_constraintTop_toBottomOf="@+id/deskription_text" >
+                    <TextView
+                        android:textSize="15dp"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:text="Ускорить переход"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

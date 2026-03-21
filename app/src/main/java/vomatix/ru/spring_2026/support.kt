@@ -1,59 +1,46 @@
 package vomatix.ru.spring_2026
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class support : Fragment(R.layout.fragment_support) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [support.newInstance] factory method to
- * create an instance of this fragment.
- */
-class support : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+        val title = view.findViewById<TextView>(R.id.textView)
+        val searchBar = view.findViewById<ConstraintLayout>(R.id.search_bar)
+        val levelBlock = view.findViewById<ConstraintLayout>(R.id.level_up_constr)
+        val ratingBlock = view.findViewById<ConstraintLayout>(R.id.rating_constr)
+
+        // 🔥 список элементов
+        val elements = listOf(title, levelBlock, ratingBlock, searchBar)
+
+        // 💨 начальное состояние
+        elements.forEach {
+            it.alpha = 0f
+            it.translationY = 80f
+        }
+
+        // 🚀 анимация появления
+        elements.forEachIndexed { index, viewItem ->
+            viewItem.postDelayed({
+                viewItem.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(500)
+                    .setInterpolator(OvershootInterpolator(1.2f))
+                    .start()
+            }, (index * 120).toLong())
         }
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_support, container, false)
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment support.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            support().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    fun View.pressAnim() {
+        this.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
+            this.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+        }.start()
     }
 }

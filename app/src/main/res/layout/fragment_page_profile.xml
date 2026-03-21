@@ -15,7 +15,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="-50dp"
-            app:cardCornerRadius="24dp"
+            app:cardCornerRadius="400dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/constraintLayout4">
@@ -23,8 +23,7 @@
             <ImageView
                 android:id="@+id/profileImage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/ic_launcher_background"/>
+                android:layout_height="match_parent" />
 
         </androidx.cardview.widget.CardView>
 

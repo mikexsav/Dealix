@@ -129,17 +129,17 @@ class AuthActivity : AppCompatActivity() {
             findViewById(R.id.btnDelete)
         )
 
-        keyViews[0].setOnClickListener { addDigit("1") }
-        keyViews[1].setOnClickListener { addDigit("2") }
-        keyViews[2].setOnClickListener { addDigit("3") }
-        keyViews[3].setOnClickListener { addDigit("4") }
-        keyViews[4].setOnClickListener { addDigit("5") }
-        keyViews[5].setOnClickListener { addDigit("6") }
-        keyViews[6].setOnClickListener { addDigit("7") }
-        keyViews[7].setOnClickListener { addDigit("8") }
-        keyViews[8].setOnClickListener { addDigit("9") }
-        keyViews[9].setOnClickListener { addDigit("0") }
-        keyViews[10].setOnClickListener { deleteDigit() }
+        keyViews[0].setOnClickListener { addDigit("1");it.pressAnim() }
+        keyViews[1].setOnClickListener { addDigit("2");it.pressAnim() }
+        keyViews[2].setOnClickListener { addDigit("3");it.pressAnim() }
+        keyViews[3].setOnClickListener { addDigit("4");it.pressAnim() }
+        keyViews[4].setOnClickListener { addDigit("5");it.pressAnim() }
+        keyViews[5].setOnClickListener { addDigit("6");it.pressAnim() }
+        keyViews[6].setOnClickListener { addDigit("7");it.pressAnim() }
+        keyViews[7].setOnClickListener { addDigit("8");it.pressAnim() }
+        keyViews[8].setOnClickListener { addDigit("9");it.pressAnim() }
+        keyViews[9].setOnClickListener { addDigit("0");it.pressAnim() }
+        keyViews[10].setOnClickListener { deleteDigit();it.pressAnim() }
 
         biometricButton.setOnClickListener {
             showBiometricLoginPrompt()
@@ -371,5 +371,10 @@ class AuthActivity : AppCompatActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         overridePendingTransition(R.anim.from_left, R.anim.to_left)
         finish()
+    }
+    fun View.pressAnim() {
+        this.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
+            this.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+        }.start()
     }
 }
