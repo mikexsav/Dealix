@@ -17,6 +17,14 @@ import kotlin.math.roundToInt
 
 class RatingMore : Fragment(R.layout.fragment_rating_more) {
 
+    //R = 100 × (w₁·f(V) + w₂·f(D) + w₃·f(S)) + B - P
+    /*
+    R — итоговый рейтинг (0–100)
+    V — объем продаж
+    D — количество сделок
+    S — доля банка (%)
+    * */
+
     private var scenarioMode = false
 
     private data class MetricScore(
