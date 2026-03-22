@@ -206,7 +206,15 @@ class support : Fragment(R.layout.fragment_support) {
             }
         }
     }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(false)
+    }
 
+    override fun onPause() {
+        super.onPause()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         if (!hidden) {
@@ -400,9 +408,10 @@ private class GigaChatRepository(private val context: Context) {
         const val PREFS_NAME = "gigachat_prefs"
         const val KEY_TOKEN = "access_token"
         const val KEY_EXPIRES = "expires_at"
-        const val AUTH_KEY_BASE64 = "PASTE_YOUR_BASIC_AUTH_KEY_HERE"
+        const val AUTH_KEY_BASE64 = "MDE5ZDEyM2QtYzI1My03YmRiLTk1NWYtY2YwNzBkMjE3NmRiOjY2OTU1ZTE5LTJkZWYtNGE0MS04YThiLTliNTAzNzNjNmUzNA=="
         const val MODEL_NAME = "GigaChat-2"
     }
+
 }
 
 private interface GigaAuthApi {

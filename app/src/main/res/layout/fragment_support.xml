@@ -9,9 +9,11 @@
     tools:context=".support">
 
     <ImageView
+        android:scaleX="0.4"
+        android:scaleY="0.4"
         android:id="@+id/imageView9"
-        android:layout_width="12dp"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="25dp"
         android:src="@drawable/back"
@@ -126,7 +128,7 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/back_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

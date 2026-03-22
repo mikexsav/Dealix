@@ -2,6 +2,7 @@ package vomatix.ru.spring_2026
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -84,7 +85,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    fun setBottomNavVisible(visible: Boolean) {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
+        if (visible) {
+            bottomNav.animate()
+                .translationY(0f)
+                .setDuration(200)
+                .start()
+        } else {
+            bottomNav.animate()
+                .translationY(bottomNav.height.toFloat())
+                .setDuration(200)
+                .start()
+        }
+    }
     private fun setupNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         supportFragmentManager.beginTransaction().apply {

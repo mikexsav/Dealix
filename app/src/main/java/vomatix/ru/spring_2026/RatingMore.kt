@@ -421,4 +421,13 @@ class RatingMore : Fragment(R.layout.fragment_rating_more) {
             }
             .start()
     }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
 }

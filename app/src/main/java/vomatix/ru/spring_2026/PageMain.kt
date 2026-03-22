@@ -21,12 +21,7 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
         tvStatus = view.findViewById(R.id.textView22)
         tvProgress = view.findViewById(R.id.tvProgressText)
 
-        val poddershka = view.findViewById<ConstraintLayout>(R.id.poddershka)
         val gotoGIGA = view.findViewById<ConstraintLayout>(R.id.gotoGIGA)
-        poddershka.setOnClickListener {
-            it.pressAnim()
-            openSupport()
-        }
         gotoGIGA.setOnClickListener {
             it.pressAnim()
             openSupport()

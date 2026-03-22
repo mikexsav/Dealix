@@ -17,9 +17,11 @@
             android:layout_height="wrap_content">
 
             <ImageView
+                android:scaleX="0.4"
+                android:scaleY="0.4"
                 android:id="@+id/btnBack"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="18dp"
                 android:layout_marginTop="24dp"
                 android:src="@drawable/back"
