@@ -59,20 +59,21 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
             it.pressAnim()
             openPeriods()
         }
-
+        animateUI(view)
     }
     fun View.pressAnim() {
         this.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
             this.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
         }.start()
     }
-
+    private var isFirstLoad = true
     private fun openSupport() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, support())
             .addToBackStack(null)
             .commit()
     }
+
     private fun openPeriods() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, RatingMore())
@@ -100,7 +101,44 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
 
     override fun onResume() {
         super.onResume()
-
         (activity as? MainActivity)?.runCalculation()
+
+        if (isFirstLoad) {
+            view?.post {
+                animateUI(requireView())
+            }
+            isFirstLoad = false
+        }
+    }
+    private fun animateUI(root: View) {
+
+        val elements = listOf(
+            progressBar,
+            tvStatus,
+            tvProgress,
+            rating_text,
+            root.findViewById<View>(R.id.profileclick),
+            root.findViewById<View>(R.id.financeeffect),
+            root.findViewById<View>(R.id.smotr),
+            root.findViewById<View>(R.id.gotoGIGA),
+            root.findViewById<View>(R.id.advantage_level),
+            root.findViewById<View>(R.id.finance_perehod)
+        )
+
+        elements.forEach {
+            it.clearAnimation() // 🔥 важно
+            it.alpha = 0f
+            it.translationY = 60f
+        }
+
+        elements.forEachIndexed { index, v ->
+            v.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay((index * 70).toLong())
+                .setDuration(300)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+        }
     }
 }
