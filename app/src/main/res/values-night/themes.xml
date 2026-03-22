@@ -3,5 +3,7 @@
     <style name="Base.Theme.Spring_2026" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="fontFamily">@font/jost</item>
+
     </style>
 </resources>
