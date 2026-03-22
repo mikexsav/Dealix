@@ -44,6 +44,17 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
 
         runCalculation()
+
+        val intent = android.content.Intent(this, NewAppWidget::class.java).apply {
+            action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        }
+
+        val ids = android.appwidget.AppWidgetManager.getInstance(application)
+            .getAppWidgetIds(android.content.ComponentName(application, NewAppWidget::class.java))
+        intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        sendBroadcast(intent)
+
+        Log.d("SBER_DEBUG", "Виджет оповещен об обновлении")
     }
 
     fun runCalculation() {

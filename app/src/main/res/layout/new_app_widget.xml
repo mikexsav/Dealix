@@ -1,66 +1,57 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp">
+        android:background="@drawable/main_back"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Кредиты"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/main_back"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:padding="16dp">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="10dp">
 
             <TextView
-                android:id="@+id/widget_title"
-                android:layout_width="wrap_content"
+                android:id="@+id/widget_count"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Кредиты"
+                android:text="0, шт."
                 android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="10dp">
+            <ImageView
+                android:layout_width="2dp"
+                android:layout_height="40dp"
+                android:background="#FFFFFF" />
 
-                <TextView
-                    android:id="@+id/widget_count"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="12, шт."
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
-
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="40dp"
-                    android:background="#FFFFFF" />
-
-                <TextView
-                    android:id="@+id/widget_sum"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="342,3 млн."
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/widget_sum"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="0.0 млн."
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center" />
         </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
+    </LinearLayout>
 </RelativeLayout>
