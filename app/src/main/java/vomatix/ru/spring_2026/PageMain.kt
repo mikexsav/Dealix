@@ -23,7 +23,18 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
         tvStatus = view.findViewById(R.id.textView22)
         tvProgress = view.findViewById(R.id.tvProgressText)
         rating_text = view.findViewById(R.id.rating_text)
+        val profileClick = view.findViewById<ConstraintLayout>(R.id.profileclick)
 
+        profileClick.setOnClickListener {
+            it.pressAnim()
+            (activity as? MainActivity)?.selectBottomItem(R.id.page_profile)
+        }
+        val financeEffect = view.findViewById<ConstraintLayout>(R.id.financeeffect)
+
+        financeEffect.setOnClickListener {
+            it.pressAnim()
+            (activity as? MainActivity)?.selectBottomItem(R.id.page_effect)
+        }
         val smotr = view.findViewById<ConstraintLayout>(R.id.smotr)
         smotr.setOnClickListener {
             it.pressAnim()

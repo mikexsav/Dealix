@@ -128,4 +128,8 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
     }
+    fun selectBottomItem(itemId: Int) {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.selectedItemId = itemId
+    }
 }
