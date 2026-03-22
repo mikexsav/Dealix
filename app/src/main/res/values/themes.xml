@@ -11,13 +11,16 @@
         <item name="android:layout_margin">8dp</item>
         <item name="android:background">@drawable/bg_pin_empty</item>
     </style>
+
     <style name="GreenIndicator">
         <item name="android:color">@android:color/transparent</item>
         <item name="shapeAppearance">@style/RoundedIndicator</item>
     </style>
+
     <style name="RoundedIndicator">
         <item name="cornerSize">16dp</item>
     </style>
+
     <style name="PinKeySimple">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">72dp</item>
@@ -31,4 +34,19 @@
 
 
     <style name="Theme.Spring_2026" parent="Base.Theme.Spring_2026" />
+
+    <style name="Theme.Spring_2026.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
+        <!-- Radius of the outer bound of widgets to make the rounded corners -->
+        <item name="appWidgetRadius">16dp</item>
+        <!--
+        Radius of the inner view's bound of widgets to make the rounded corners.
+        It needs to be 8dp or less than the value of appWidgetRadius
+        -->
+        <item name="appWidgetInnerRadius">8dp</item>
+    </style>
+
+    <style name="Theme.Spring_2026.AppWidgetContainer" parent="Theme.Spring_2026.AppWidgetContainerParent">
+        <!-- Apply padding to avoid the content of the widget colliding with the rounded corners -->
+        <item name="appWidgetPadding">16dp</item>
+    </style>
 </resources>
