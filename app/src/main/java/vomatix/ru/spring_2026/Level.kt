@@ -1,12 +1,12 @@
 package vomatix.ru.spring_2026
 
-import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
 import android.view.Gravity
@@ -17,7 +17,6 @@ import android.view.animation.OvershootInterpolator
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -25,8 +24,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -65,26 +64,86 @@ class Level : AppCompatActivity() {
 
     private lateinit var root: View
     private lateinit var backBtn: ImageView
-    private lateinit var recyclerView: RecyclerView
+
+    private lateinit var levelsRecycler: RecyclerView
+    private lateinit var levelsAdapter: LevelAdapter
 
     private lateinit var dealsValueTv: TextView
-    private lateinit var volumeValueTv: TextView
     private lateinit var shareValueTv: TextView
     private lateinit var volumeEdit: EditText
     private lateinit var calcButton: TextView
     private lateinit var titleText: TextView
+    private lateinit var privilegesText: TextView
 
     private lateinit var dealsPlus: View
     private lateinit var dealsMinus: View
     private lateinit var sharePlus: View
     private lateinit var shareMinus: View
+    private lateinit var dealsContainer: ConstraintLayout
+    private lateinit var volumeContainer: ConstraintLayout
+    private lateinit var shareContainer: ConstraintLayout
 
     private var deals = 0
     private var sharePercent = 0
     private var volumeRub = 0L
-    private var selfChange = false
+    private var selectedLevelIndex = 0
     private var hasAnimated = false
 
+    private fun showResultDialog(result: ScenarioResult) {
+
+        val dialogLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(40, 40, 40, 40)
+        }
+
+        fun createText(text: String, size: Float = 16f, bold: Boolean = false): TextView {
+            return TextView(this).apply {
+                this.text = text
+                textSize = size
+                setTextColor(Color.WHITE)
+                if (bold) setTypeface(null, Typeface.BOLD)
+                setPadding(0, 10, 0, 10)
+            }
+        }
+
+        dialogLayout.addView(createText("Ваш результат", 20f, true))
+
+        dialogLayout.addView(createText("Скор: ${result.score}"))
+        dialogLayout.addView(createText("Уровень: ${result.currentLevel.name}"))
+
+        if (result.nextLevel != null) {
+            dialogLayout.addView(createText("До ${result.nextLevel.name}: ${result.pointsToNext} баллов"))
+        }
+
+        dialogLayout.addView(createText(""))
+
+        dialogLayout.addView(createText("Годовая выгода:", 18f, true))
+        dialogLayout.addView(createText("${formatMoney(result.annualBenefit)} ₽", 22f, true))
+
+        dialogLayout.addView(createText(""))
+        dialogLayout.addView(createText("Разбивка:", 18f, true))
+        dialogLayout.addView(createText("Бонусы: ${formatMoney(result.bonusBlock)} ₽"))
+        dialogLayout.addView(createText("Ипотека: ${formatMoney(result.mortgageBlock)} ₽"))
+        dialogLayout.addView(createText("Кэшбэк: ${formatMoney(result.cashbackBlock)} ₽"))
+        dialogLayout.addView(createText("ДМС: ${formatMoney(result.dmsBlock)} ₽"))
+
+        dialogLayout.addView(createText(""))
+        dialogLayout.addView(createText("Аналитика:", 18f, true))
+        dialogLayout.addView(createText("Баланс бонус: ${result.balanceBonus}"))
+        dialogLayout.addView(createText("Штраф: ${result.penalty}"))
+
+        dialogLayout.addView(createText(""))
+        dialogLayout.addView(createText("Модель:", 18f, true))
+        dialogLayout.addView(createText(result.formulaText))
+
+        val scroll = android.widget.ScrollView(this)
+        scroll.addView(dialogLayout)
+
+        AlertDialog.Builder(this)
+            .setView(scroll)
+            .setPositiveButton("ОК") { d, _ -> d.dismiss() }
+            .show()
+    }
     private val levels = listOf(
         LevelTier(
             name = "Silver",
@@ -111,7 +170,7 @@ class Level : AppCompatActivity() {
             multiplier = 1.08
         ),
         LevelTier(
-            name = "Black",
+            name = "Platinum",
             minScore = 85,
             accent = Color.parseColor("#19B34B"),
             subtitle = "Максимальный пакет",
@@ -138,9 +197,9 @@ class Level : AppCompatActivity() {
         }
 
         bindViews()
-        setupRecycler()
-        setupControls()
-        syncFromStore()
+        setupLevelsRecycler()
+        setupCalculator()
+        resetDefaults()
         renderPreview(animated = false)
         animateEntrance()
     }
@@ -153,168 +212,228 @@ class Level : AppCompatActivity() {
     }
 
     private fun bindViews() {
-        backBtn = findViewById(R.id.imageView8)
-        titleText = findTextViewByText(root, "Сценарный калькулятор") ?: findViewById(R.id.textView14)
+        backBtn = findRequiredImageView(R.id.imageView8)
 
-        recyclerView = findFirstViewOfType(root, RecyclerView::class.java)
+        titleText = findTextViewByText(root, "Привилегии уровней")
+            ?: findRequiredTextView(R.id.textView14)
+
+        levelsRecycler = findFirstRecyclerView(root)
             ?: throw IllegalStateException("RecyclerView not found in activity_level.xml")
 
-        val dealsBlock = findRequiredConstraintLayout(root, R.id.constraintLayout9)
-        val volumeBlock = findRequiredConstraintLayout(root, R.id.constraintLayout10)
-        val shareBlock = findRequiredConstraintLayout(root, R.id.constraintLayout11)
+        dealsContainer = findRequiredConstraintLayout(R.id.constraintLayout9)
+        volumeContainer = findRequiredConstraintLayout(R.id.constraintLayout10)
+        shareContainer = findRequiredConstraintLayout(R.id.constraintLayout11)
 
-        dealsValueTv = findRequiredTextView(root, R.id.textView16)
-        volumeEdit = findFirstEditText(volumeBlock)
+        dealsValueTv = findRequiredTextView(R.id.textView16)
+        shareValueTv = findRequiredTextView(R.id.textView19)
+
+        volumeEdit = findFirstEditText(volumeContainer)
             ?: throw IllegalStateException("EditText not found inside constraintLayout10")
-        shareValueTv = findRequiredTextView(root, R.id.textView19)
 
-        dealsPlus = dealsBlock.getChildAt(2)
-        dealsMinus = dealsBlock.getChildAt(1)
-        sharePlus = shareBlock.getChildAt(2)
-        shareMinus = shareBlock.getChildAt(1)
+        dealsMinus = dealsContainer.getChildAt(1)
+        dealsPlus = dealsContainer.getChildAt(2)
+
+        shareMinus = shareContainer.getChildAt(1)
+        sharePlus = shareContainer.getChildAt(2)
 
         calcButton = findTextViewByText(root, "Рассчитать")
             ?: throw IllegalStateException("Button 'Рассчитать' not found")
 
-        volumeValueTv = findRequiredTextView(root, R.id.textView18)
+        privilegesText = findPrivilegesTextView()
+            ?: throw IllegalStateException("Privileges text block not found")
 
-        val btnBack = backBtn
-        btnBack.setOnClickListener {
-            it.pressAnim()
+        backBtn.setOnClickListener {
+            it.softTapAnim()
             finish()
         }
     }
 
-    private fun setupRecycler() {
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = TierAdapter(levels)
-        recyclerView.itemAnimator = null
-        recyclerView.setHasFixedSize(true)
+    private fun setupLevelsRecycler() {
+        levelsAdapter = LevelAdapter(
+            levels = levels,
+            selectedIndex = selectedLevelIndex,
+            onSelect = { index ->
+                selectedLevelIndex = index
+                levelsAdapter.setSelectedIndex(index)
+                renderPreview(animated = true)
+            }
+        )
+
+        levelsRecycler.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
+        levelsRecycler.adapter = levelsAdapter
+        levelsRecycler.itemAnimator = null
+        levelsRecycler.setHasFixedSize(true)
+        levelsRecycler.isNestedScrollingEnabled = false
+        levelsRecycler.overScrollMode = View.OVER_SCROLL_NEVER
+
+        val snapHelper = PagerSnapHelper()
+        snapHelper.attachToRecyclerView(levelsRecycler)
+
+        levelsRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val manager = recyclerView.layoutManager as? LinearLayoutManager ?: return
+                    val snapView = snapHelper.findSnapView(manager) ?: return
+                    val position = manager.getPosition(snapView)
+                    if (position != selectedLevelIndex && position in levels.indices) {
+                        selectedLevelIndex = position
+                        levelsAdapter.setSelectedIndex(position)
+                        renderPreview(animated = true)
+                    }
+                }
+            }
+        })
     }
 
-    private fun setupControls() {
-        dealsMinus.setOnClickListener {
-            it.pressAnim()
-            deals = (deals - 1).coerceAtLeast(0)
-            renderPreview(animated = true)
-        }
-
-        dealsPlus.setOnClickListener {
-            it.pressAnim()
-            deals = (deals + 1).coerceAtMost(999)
-            renderPreview(animated = true)
-        }
-
-        shareMinus.setOnClickListener {
-            it.pressAnim()
-            sharePercent = (sharePercent - 1).coerceAtLeast(0)
-            renderPreview(animated = true)
-        }
-
-        sharePlus.setOnClickListener {
-            it.pressAnim()
-            sharePercent = (sharePercent + 1).coerceAtMost(100)
-            renderPreview(animated = true)
-        }
+    private fun setupCalculator() {
+        dealsValueTv.text = "0"
+        shareValueTv.text = "0"
 
         volumeEdit.keyListener = DigitsKeyListener.getInstance("0123456789")
-        volumeEdit.setText(formatMoney(volumeRub))
-        volumeEdit.setSelection(volumeEdit.text?.length ?: 0)
+        volumeEdit.inputType = InputType.TYPE_CLASS_NUMBER
+        volumeEdit.setText("0")
+        volumeEdit.setSelection(1)
+
+        volumeEdit.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && volumeEdit.text.toString() == "0") {
+                volumeEdit.setText("")
+            }
+            if (!hasFocus && volumeEdit.text.isNullOrBlank()) {
+                volumeEdit.setText("0")
+                volumeRub = 0L
+                renderPreview(animated = false)
+            }
+        }
 
         volumeEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
-                if (selfChange) return
-                volumeRub = parseMoney(s?.toString().orEmpty())
+                val text = s?.toString().orEmpty()
+                if (text.isBlank()) {
+                    volumeRub = 0L
+                } else {
+                    volumeRub = parseMoney(text)
+                }
                 renderPreview(animated = false)
             }
         })
 
+        dealsMinus.setOnClickListener {
+            it.softTapAnim()
+            deals = (deals - 1).coerceAtLeast(0)
+            renderPreview(animated = true)
+        }
+
+        dealsPlus.setOnClickListener {
+            it.softTapAnim()
+            deals = (deals + 1).coerceAtMost(999)
+            renderPreview(animated = true)
+        }
+
+        shareMinus.setOnClickListener {
+            it.softTapAnim()
+            sharePercent = (sharePercent - 1).coerceAtLeast(0)
+            renderPreview(animated = true)
+        }
+
+        sharePlus.setOnClickListener {
+            it.softTapAnim()
+            sharePercent = (sharePercent + 1).coerceAtMost(100)
+            renderPreview(animated = true)
+        }
+
+        volumeContainer.setOnClickListener {
+            volumeEdit.requestFocus()
+            volumeEdit.setSelection(volumeEdit.text?.length ?: 0)
+        }
+
         calcButton.setOnClickListener {
-            it.pressAnim()
+            it.softTapAnim()
+
             val result = calculate()
             showResultDialog(result)
         }
-
-        // Если юзер меняет данные — кнопка сразу отражает текущий прогноз
-        volumeValueTv.text = "Доля банка, %"
     }
 
-    private fun syncFromStore() {
-        val dashboard = DashboardStore.dashboardState
-        val levelName = dashboard?.level?.name ?: "Silver"
+    private fun resetDefaults() {
+        deals = 0
+        sharePercent = 0
+        volumeRub = 0L
+        selectedLevelIndex = 0
 
-        when (levelName.lowercase()) {
-            "silver" -> {
-                deals = 0
-                sharePercent = 0
-                volumeRub = 0L
-            }
-            "gold" -> {
-                deals = 6
-                sharePercent = 4
-                volumeRub = 2_500_000L
-            }
-            "black" -> {
-                deals = 11
-                sharePercent = 7
-                volumeRub = 6_000_000L
-            }
-        }
-
-        if (dashboard != null) {
-            val boost = dashboard.totalPoints.coerceIn(0, 100)
-            deals = (deals + boost / 20).coerceAtMost(999)
-            sharePercent = (sharePercent + boost / 25).coerceAtMost(100)
-            volumeRub += (boost * 40_000L)
-        }
-
-        updateUiState()
+        dealsValueTv.text = "0"
+        shareValueTv.text = "0"
+        volumeEdit.setText("0")
+        volumeEdit.setSelection(1)
+        levelsAdapter.setSelectedIndex(0)
+        updateTitleAndPrivileges(levels[0])
     }
 
-    private fun updateUiState() {
+    private fun updateTitleAndPrivileges(level: LevelTier) {
+        titleText.text = "Привилегии уровней • ${level.name}"
+
+        privilegesText.text = buildString {
+            appendLine("Текущий уровень: ${level.name}")
+            appendLine(level.subtitle)
+            appendLine()
+            appendLine("Привилегии:")
+            level.perks.forEach { appendLine("• $it") }
+        }
+    }
+
+    private fun renderPreview(animated: Boolean) {
+        val result = calculate()
+        val selectedLevel = levels[selectedLevelIndex]
+
         dealsValueTv.text = deals.toString()
         shareValueTv.text = sharePercent.toString()
-        volumeEdit.setText(formatMoney(volumeRub))
-        volumeEdit.setSelection(volumeEdit.text?.length ?: 0)
-        renderPreview(animated = false)
+        updateTitleAndPrivileges(selectedLevel)
+
+        calcButton.text = "Рассчитать • ${formatMoney(result.annualBenefit)} ₽"
+
+        if (animated) {
+            pulse(calcButton)
+            pulse(dealsValueTv)
+            pulse(shareValueTv)
+        }
     }
 
     private fun calculate(): ScenarioResult {
-        val currentLevelSeed = DashboardStore.dashboardState?.level?.name ?: "Silver"
-        val currentTier = levels.firstOrNull { it.name.equals(currentLevelSeed, ignoreCase = true) } ?: levels[0]
+        val currentLevel = levels[selectedLevelIndex]
 
         val volumeM = volumeRub / 1_000_000.0
         val dealsScore = saturatingScore(deals.toDouble(), k = 9.0, maxPoints = 40.0)
         val volumeScore = saturatingScore(volumeM, k = 8.0, maxPoints = 35.0)
         val shareScore = saturatingScore(sharePercent.toDouble(), k = 6.0, maxPoints = 25.0)
 
-        val score = (dealsScore + volumeScore + shareScore + synergyBonus(dealsScore, volumeScore, shareScore) - penalty(dealsScore, volumeScore, shareScore))
-            .roundToInt()
-            .coerceIn(0, 100)
+        val rawBase = dealsScore + volumeScore + shareScore
+        val syncBonus = synergyBonus(dealsScore, volumeScore, shareScore)
+        val penaltyPoints = penalty(dealsScore, volumeScore, shareScore)
 
-        val currentLevel = levels.lastOrNull { score >= it.minScore } ?: levels.first()
-        val nextLevel = levels.firstOrNull { it.minScore > currentLevel.minScore }
-        val targetThreshold = nextLevel?.minScore ?: 100
+        val score = (
+                rawBase +
+                        syncBonus -
+                        penaltyPoints +
+                        levelOffset(currentLevel)
+                ).roundToInt().coerceIn(0, 100)
+
+        val currentTier = levels.lastOrNull { score >= it.minScore } ?: levels.first()
+        val nextTier = levels.firstOrNull { it.minScore > currentTier.minScore }
+        val targetThreshold = nextTier?.minScore ?: 100
         val pointsToNext = max(0, targetThreshold - score)
-
-        val levelMul = when (currentLevel.name.lowercase()) {
-            "silver" -> 0.96
-            "gold" -> 1.08
-            "black" -> 1.18
-            else -> 1.0
-        }
 
         val baseAnnual = 220_000.0
         val momentum = 1.0 + score / 100.0 * 0.42
         val balance = balanceIndex(dealsScore, volumeScore, shareScore)
         val profileBoost = 1.0 + balance * 0.18
+        val levelBoost = currentLevel.multiplier
 
         val annualBenefit = (
                 baseAnnual *
-                        levelMul *
+                        levelBoost *
                         momentum *
                         profileBoost *
                         (0.90 + min(0.25, volumeM / 30.0)) *
@@ -322,7 +441,6 @@ class Level : AppCompatActivity() {
                 ).roundToLong()
 
         val balanceBonus = (balance * 14.0).roundToInt().coerceAtLeast(0)
-        val penaltyPoints = penalty(dealsScore, volumeScore, shareScore)
 
         val bonusBlock = (annualBenefit * 0.36 + score * 910 + deals * 3200).roundToLong()
         val mortgageBlock = (annualBenefit * 0.27 + sharePercent * 4400 + volumeM * 1200).roundToLong()
@@ -332,22 +450,23 @@ class Level : AppCompatActivity() {
         val formulaText = buildString {
             appendLine("Модель сценарного эффекта:")
             appendLine()
-            appendLine("S = 100 × (0.40·f(D) + 0.35·f(V) + 0.25·f(B)) + Bsyn - P")
+            appendLine("S = 100 × (0.40·f(D) + 0.35·f(V) + 0.25·f(B)) + Bsyn + L - P")
             appendLine("f(x) = 1 - e^(-x / k)")
             appendLine("D — сделки")
             appendLine("V — объем")
             appendLine("B — доля банка")
             appendLine("Bsyn — бонус за баланс")
+            appendLine("L — вклад выбранного уровня")
             appendLine("P — штраф за перекос")
             appendLine()
-            appendLine("Текущий уровень: ${currentLevel.name}")
+            appendLine("Выбранный уровень: ${currentLevel.name}")
             appendLine("Баланс-профиль: ${"%.2f".format(balance)}")
         }.trimIndent()
 
         return ScenarioResult(
             score = score,
-            currentLevel = currentLevel,
-            nextLevel = nextLevel,
+            currentLevel = currentTier,
+            nextLevel = nextTier,
             pointsToNext = pointsToNext,
             annualBenefit = annualBenefit,
             bonusBlock = bonusBlock,
@@ -363,54 +482,13 @@ class Level : AppCompatActivity() {
         )
     }
 
-    private fun renderPreview(animated: Boolean) {
-        val result = calculate()
-
-        dealsValueTv.text = result.score.toString()
-        shareValueTv.text = sharePercent.toString()
-
-        calcButton.text = "Рассчитать • ${formatMoney(result.annualBenefit)} ₽"
-
-        volumeValueTv.text = when (result.currentLevel.name.lowercase()) {
-            "silver" -> "Доля банка, %"
-            "gold" -> "Доля банка, %"
-            "black" -> "Доля банка, %"
-            else -> "Доля банка, %"
+    private fun levelOffset(level: LevelTier): Int {
+        return when (level.name.lowercase()) {
+            "silver" -> 0
+            "gold" -> 8
+            "Platinum" -> 14
+            else -> 4
         }
-
-        if (animated) {
-            pulse(calcButton)
-            pulse(dealsValueTv)
-            pulse(shareValueTv)
-        }
-    }
-
-    private fun showResultDialog(result: ScenarioResult) {
-        val next = result.nextLevel?.name ?: "максимума"
-
-        val msg = buildString {
-            appendLine("Статус: ${result.currentLevel.name}")
-            appendLine("До $next осталось: ${result.pointsToNext} баллов")
-            appendLine()
-            appendLine("Итоговый рейтинг: ${result.score}/100")
-            appendLine("Годовой эффект: ${formatMoney(result.annualBenefit)} ₽")
-            appendLine()
-            appendLine("Бонусы: ${formatMoney(result.bonusBlock)} ₽")
-            appendLine("Ипотека: ${formatMoney(result.mortgageBlock)} ₽")
-            appendLine("Кэшбэк: ${formatMoney(result.cashbackBlock)} ₽")
-            appendLine("ДМС: ${formatMoney(result.dmsBlock)} ₽")
-            appendLine()
-            appendLine("Бонус за баланс: +${result.balanceBonus}")
-            appendLine("Штраф за перекос: -${result.penalty}")
-            appendLine()
-            appendLine(result.formulaText)
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Сценарный калькулятор")
-            .setMessage(msg)
-            .setPositiveButton("Понятно", null)
-            .show()
     }
 
     private fun saturatingScore(value: Double, k: Double, maxPoints: Double): Double {
@@ -471,14 +549,11 @@ class Level : AppCompatActivity() {
 
         val items = listOf(
             titleText,
-            recyclerView,
-            findRequiredTextView(root, R.id.textView14),
-            findRequiredTextView(root, R.id.textView15),
-            findRequiredConstraintLayout(root, R.id.constraintLayout9),
-            findRequiredTextView(root, R.id.textView17),
-            findRequiredConstraintLayout(root, R.id.constraintLayout10),
-            findRequiredTextView(root, R.id.textView18),
-            findRequiredConstraintLayout(root, R.id.constraintLayout11),
+            levelsRecycler,
+            privilegesText,
+            dealsContainer,
+            volumeContainer,
+            shareContainer,
             calcButton
         )
 
@@ -505,51 +580,54 @@ class Level : AppCompatActivity() {
 
     private fun pulse(view: View) {
         view.animate()
-            .scaleX(0.96f)
-            .scaleY(0.96f)
-            .setDuration(80)
+            .alpha(0.78f)
+            .setDuration(60)
             .withEndAction {
                 view.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(120)
-                    .setInterpolator(OvershootInterpolator(1.15f))
+                    .alpha(1f)
+                    .setDuration(110)
+                    .setInterpolator(DecelerateInterpolator())
                     .start()
             }
             .start()
     }
 
-    private fun View.pressAnim() {
+    private fun View.softTapAnim() {
         animate()
-            .scaleX(0.96f)
-            .scaleY(0.96f)
-            .setDuration(80)
+            .scaleX(0.98f)
+            .scaleY(0.98f)
+            .setDuration(70)
             .withEndAction {
                 animate()
                     .scaleX(1f)
                     .scaleY(1f)
-                    .setDuration(120)
-                    .setInterpolator(OvershootInterpolator(1.15f))
+                    .setDuration(90)
+                    .setInterpolator(OvershootInterpolator(1.08f))
                     .start()
             }
             .start()
     }
 
-    private fun findRequiredTextView(root: View, id: Int): TextView {
-        return root.findViewById(id)
+    private fun findRequiredImageView(id: Int): ImageView {
+        return findViewById(id)
+            ?: throw IllegalStateException("ImageView id=$id not found")
+    }
+
+    private fun findRequiredTextView(id: Int): TextView {
+        return findViewById(id)
             ?: throw IllegalStateException("TextView id=$id not found")
     }
 
-    private fun findRequiredConstraintLayout(root: View, id: Int): ConstraintLayout {
-        return root.findViewById(id)
+    private fun findRequiredConstraintLayout(id: Int): ConstraintLayout {
+        return findViewById(id)
             ?: throw IllegalStateException("ConstraintLayout id=$id not found")
     }
 
-    private fun findTextViewByText(root: View, target: String): TextView? {
-        if (root is TextView && root.text?.toString() == target) return root
+    private fun findFirstRecyclerView(root: View): RecyclerView? {
+        if (root is RecyclerView) return root
         if (root is ViewGroup) {
             for (i in 0 until root.childCount) {
-                val found = findTextViewByText(root.getChildAt(i), target)
+                val found = findFirstRecyclerView(root.getChildAt(i))
                 if (found != null) return found
             }
         }
@@ -567,189 +645,178 @@ class Level : AppCompatActivity() {
         return null
     }
 
-    private fun <T : View> findFirstViewOfType(root: View, clazz: Class<T>): T? {
-        if (clazz.isInstance(root)) return clazz.cast(root)
+    private fun findTextViewByText(root: View, target: String): TextView? {
+        if (root is TextView && root.text?.toString() == target) return root
         if (root is ViewGroup) {
             for (i in 0 until root.childCount) {
-                val found = findFirstViewOfType(root.getChildAt(i), clazz)
+                val found = findTextViewByText(root.getChildAt(i), target)
                 if (found != null) return found
             }
         }
         return null
     }
 
-    private class TierAdapter(
-        private val items: List<LevelTier>
-    ) : RecyclerView.Adapter<TierAdapter.TierHolder>() {
+    private fun findPrivilegesTextView(): TextView? {
+        val label = findTextViewByText(root, "Список привилегий") ?: return null
+        val parent = label.parent as? ViewGroup ?: return null
+        for (i in 0 until parent.childCount) {
+            val child = parent.getChildAt(i)
+            if (child is TextView && child !== label) return child
+        }
+        return null
+    }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TierHolder {
-            val ctx = parent.context
+    private inner class LevelAdapter(
+        private val levels: List<LevelTier>,
+        private var selectedIndex: Int,
+        private val onSelect: (Int) -> Unit
+    ) : RecyclerView.Adapter<LevelAdapter.Holder>() {
 
-            val card = LinearLayout(ctx).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(ctx, 16), dp(ctx, 16), dp(ctx, 16), dp(ctx, 16))
-                background = rounded(Color.parseColor("#1A1A1A"), dp(ctx, 24).toFloat())
-                layoutParams = RecyclerView.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(dp(ctx, 10), dp(ctx, 8), dp(ctx, 10), dp(ctx, 8))
-                }
-            }
-
-            val header = LinearLayout(ctx).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-            }
-
-            val badge = TextView(ctx).apply {
-                setTypeface(typeface, Typeface.BOLD)
-                setTextColor(Color.WHITE)
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(dp(ctx, 42), dp(ctx, 42))
-                background = rounded(Color.parseColor("#2C2C2C"), dp(ctx, 21).toFloat())
-                textSize = 14f
-            }
-
-            val textBlock = LinearLayout(ctx).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginStart = dp(ctx, 12)
-                }
-            }
-
-            val title = TextView(ctx).apply {
-                setTypeface(typeface, Typeface.BOLD)
-                setTextColor(Color.WHITE)
-                textSize = 17f
-            }
-
-            val subtitle = TextView(ctx).apply {
-                setTextColor(Color.parseColor("#A7A7A7"))
-                textSize = 13f
-            }
-
-            textBlock.addView(title)
-            textBlock.addView(subtitle)
-
-            val minScore = TextView(ctx).apply {
-                setTextColor(Color.parseColor("#7E7E7E"))
-                setTypeface(typeface, Typeface.BOLD)
-                textSize = 12f
-            }
-
-            header.addView(badge)
-            header.addView(textBlock)
-            header.addView(minScore)
-
-            val perks = TextView(ctx).apply {
-                setTextColor(Color.WHITE)
-                textSize = 13f
-                setLineSpacing(0f, 1.12f)
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    topMargin = dp(ctx, 10)
-                }
-            }
-
-            card.addView(header)
-            card.addView(perks)
-
-            return TierHolder(card, badge, title, subtitle, minScore, perks)
+        fun setSelectedIndex(index: Int) {
+            selectedIndex = index
         }
 
-        override fun onBindViewHolder(holder: TierHolder, position: Int) {
-            holder.bind(items[position])
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+            val view = layoutInflater.inflate(R.layout.item_level, parent, false)
+            return Holder(view)
+        }
+
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            holder.bind(levels[position], position == selectedIndex)
 
             holder.itemView.alpha = 0f
-            holder.itemView.translationY = 24f
+            holder.itemView.translationY = 18f
             holder.itemView.postDelayed({
                 holder.itemView.animate()
                     .alpha(1f)
                     .translationY(0f)
-                    .setDuration(260)
+                    .setDuration(240)
                     .setInterpolator(DecelerateInterpolator())
                     .start()
-            }, (position * 80).toLong())
+            }, (position * 65L).coerceAtMost(240L))
+
+            holder.itemView.setOnClickListener {
+                selectedIndex = position
+                notifyDataSetChanged()
+                onSelect(position)
+
+                it.softTapAnim()
+            }
         }
 
-        override fun getItemCount(): Int = items.size
+        override fun getItemCount(): Int = levels.size
 
-        class TierHolder(
-            itemView: View,
-            private val badge: TextView,
-            private val title: TextView,
-            private val subtitle: TextView,
-            private val minScore: TextView,
-            private val perks: TextView
-        ) : RecyclerView.ViewHolder(itemView) {
+        inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-            fun bind(item: LevelTier) {
-                badge.text = item.name.firstOrNull()?.uppercase() ?: "?"
+            private val rootCard: ViewGroup = itemView as ViewGroup
+            private val container: ViewGroup = rootCard.getChildAt(0) as ViewGroup
+
+            private val imageView: ImageView = findFirstImageView(itemView)
+                ?: throw IllegalStateException("ImageView not found in item_level")
+
+            private val texts: List<TextView> = collectTextViews(itemView)
+
+            private val title: TextView = texts.getOrNull(0)
+                ?: throw IllegalStateException("Title TextView not found in item_level")
+
+            private val subtitle: TextView = texts.getOrNull(1)
+                ?: throw IllegalStateException("Subtitle TextView not found in item_level")
+
+            private val conditionsLabel: TextView = texts.getOrNull(2)
+                ?: throw IllegalStateException("Conditions label TextView not found in item_level")
+
+            private val conditionsText: TextView = texts.getOrNull(3)
+                ?: throw IllegalStateException("Conditions text TextView not found in item_level")
+
+            private val footer: TextView = texts.getOrNull(4)
+                ?: throw IllegalStateException("Footer TextView not found in item_level")
+
+            fun bind(item: LevelTier, selected: Boolean) {
                 title.text = item.name
-                subtitle.text = item.subtitle
-                minScore.text = "от ${item.minScore} баллов"
+                subtitle.text = if (selected) item.subtitle else if (item.name == "Silver") "Не выполнены условия" else item.subtitle
+                conditionsLabel.text = "Условия:"
+                conditionsText.text = item.perks.joinToString(separator = "\n") { "• $it" }
+                footer.text = "Подробнее"
 
-                perks.text = item.perks.joinToString(separator = "\n") { "• $it" }
+                imageView.setImageResource(resolveLevelImage(item.name))
 
-                (badge.background as? GradientDrawable)?.setColor(item.accent)
-
-                (itemView.background as? GradientDrawable)?.setColor(
-                    when (item.name.lowercase()) {
-                        "silver" -> Color.parseColor("#171717")
-                        "gold" -> Color.parseColor("#1D1910")
-                        "black" -> Color.parseColor("#111A13")
-                        else -> Color.parseColor("#171717")
-                    }
-                )
-            }
-        }
-
-        companion object {
-            private fun dp(context: AppCompatActivity, value: Int): Int {
-                return (value * context.resources.displayMetrics.density).roundToInt()
+                setBackground(container, item, selected)
+                applyTextColors(item, selected)
+                applySelectionVisuals(selected)
             }
 
-            private fun dp(context: android.content.Context, value: Int): Int {
-                return (value * context.resources.displayMetrics.density).roundToInt()
-            }
-
-            private fun rounded(color: Int, radius: Float): GradientDrawable {
-                return GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = radius
-                    setColor(color)
+            private fun setBackground(container: ViewGroup, item: LevelTier, selected: Boolean) {
+                val color = when (item.name.lowercase()) {
+                    "silver" -> if (selected) Color.parseColor("#232323") else Color.parseColor("#171717")
+                    "gold" -> if (selected) Color.parseColor("#2A2310") else Color.parseColor("#1D1910")
+                    "Platinum" -> if (selected) Color.parseColor("#132018") else Color.parseColor("#111A13")
+                    else -> Color.parseColor("#171717")
                 }
+
+                (container.background as? GradientDrawable)?.setColor(color)
+                    ?: run {
+                        container.background = GradientDrawable().apply {
+                            cornerRadius = 24f
+                            setColor(color)
+                        }
+                    }
+            }
+
+            private fun applyTextColors(item: LevelTier, selected: Boolean) {
+                title.setTextColor(if (selected) item.accent else Color.WHITE)
+                subtitle.setTextColor(if (selected) Color.WHITE else Color.parseColor("#D0D0D0"))
+                conditionsLabel.setTextColor(Color.WHITE)
+                conditionsText.setTextColor(Color.WHITE)
+                footer.setTextColor(if (selected) item.accent else Color.WHITE)
+            }
+
+            private fun applySelectionVisuals(selected: Boolean) {
+                rootCard.alpha = if (selected) 1f else 0.92f
+                rootCard.scaleX = 1f
+                rootCard.scaleY = 1f
+                rootCard.animate().cancel()
             }
         }
+    }
+
+    private fun resolveLevelImage(name: String): Int {
+        val resId = resources.getIdentifier(name.lowercase(), "drawable", packageName)
+        return if (resId != 0) resId else R.drawable.ic_launcher_background
+    }
+
+    private fun collectTextViews(root: View): List<TextView> {
+        val result = mutableListOf<TextView>()
+        fun walk(view: View) {
+            when (view) {
+                is TextView -> result.add(view)
+                is ViewGroup -> for (i in 0 until view.childCount) walk(view.getChildAt(i))
+            }
+        }
+        walk(root)
+        return result
+    }
+
+    private fun findFirstImageView(root: View): ImageView? {
+        if (root is ImageView) return root
+        if (root is ViewGroup) {
+            for (i in 0 until root.childCount) {
+                val found = findFirstImageView(root.getChildAt(i))
+                if (found != null) return found
+            }
+        }
+        return null
     }
 
     companion object {
-        private fun rounded(color: Int, radius: Float): GradientDrawable {
-            return GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = radius
-                setColor(color)
+        private fun formatMoney(value: Long): String {
+            val s = value.toString()
+            val sb = StringBuilder(s)
+            var i = sb.length - 3
+            while (i > 0) {
+                sb.insert(i, ' ')
+                i -= 3
             }
+            return sb.toString()
         }
     }
-}
-
-object DashboardStore {
-
-    data class DashboardState(
-        val totalPoints: Int,
-        val level: LevelInfo
-    )
-
-    data class LevelInfo(
-        val name: String
-    )
-
-    var dashboardState: DashboardState? = DashboardState(
-        totalPoints = 42,
-        level = LevelInfo("Gold")
-    )
 }
