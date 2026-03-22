@@ -1,6 +1,7 @@
 package vomatix.ru.spring_2026
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -13,6 +14,7 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
     private lateinit var progressBar: ProgressBar
     private lateinit var tvStatus: TextView
     private lateinit var tvProgress: TextView
+    private lateinit var rating_text: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -20,7 +22,17 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
         progressBar = view.findViewById(R.id.progressBar)
         tvStatus = view.findViewById(R.id.textView22)
         tvProgress = view.findViewById(R.id.tvProgressText)
+        rating_text = view.findViewById(R.id.rating_text)
 
+        val smotr = view.findViewById<ConstraintLayout>(R.id.smotr)
+        smotr.setOnClickListener {
+            it.pressAnim()
+
+            val url = "https://vkvideo.ru/@sber"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+
+        }
         val gotoGIGA = view.findViewById<ConstraintLayout>(R.id.gotoGIGA)
         gotoGIGA.setOnClickListener {
             it.pressAnim()
@@ -72,6 +84,7 @@ class PageMain : Fragment(R.layout.fragment_page_main) {
 
         // текст прогресса
         tvProgress.text = "$progress / 100"
+        rating_text.text = "$progress баллов"
     }
 
     override fun onResume() {
