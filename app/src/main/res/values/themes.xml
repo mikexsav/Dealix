@@ -11,7 +11,13 @@
         <item name="android:layout_margin">8dp</item>
         <item name="android:background">@drawable/bg_pin_empty</item>
     </style>
-
+    <style name="GreenIndicator">
+        <item name="android:color">@android:color/transparent</item>
+        <item name="shapeAppearance">@style/RoundedIndicator</item>
+    </style>
+    <style name="RoundedIndicator">
+        <item name="cornerSize">16dp</item>
+    </style>
     <style name="PinKeySimple">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">72dp</item>

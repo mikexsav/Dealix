@@ -28,7 +28,11 @@
         android:layout_width="0dp"
         android:layout_height="80dp"
         app:menu="@menu/bottom_menu"
-
+        android:hapticFeedbackEnabled="true"
+        app:itemActiveIndicatorStyle="@style/GreenIndicator"
+        app:itemIconTint="@drawable/bottom_nav_colors"
+        app:itemTextColor="@drawable/bottom_nav_colors"
+        android:background="@color/background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
